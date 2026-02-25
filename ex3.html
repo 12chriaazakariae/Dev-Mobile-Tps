@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversion de devises</title>
+
+    <style>
+        body{
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+        }
+        .container{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap:20px;
+            height: 50vh;
+        }
+        .resultat{
+            text-align: center;
+        }
+        .dv-affichage{
+            display: block;
+        }
+        .child-1{
+            border: 1px solid tomato;
+
+            
+        }
+        .child-1 input{
+            display: block;
+        }
+        #resultat{
+            text-align:center;
+        }
+        input , select, button{
+             width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+        button:hover{
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="child-1">
+            <input type="number" id="montant" placeholder="(ex: 100 ..) " value="1">
+            <select name="" id="devise-envoye">
+                <option value="EUR">Euro (EUR)</option>
+                <option value="USD">American Dollar (USD)</option>
+                <option value="MAD">Moroccan dirham (MAD)</option>
+                <option value="JPY">Japenis Yen (JPY)</option>
+                <option value="GBP">Pound Sterling (GBP)</option>
+            </select>
+        </div>
+        <div class="child-2">
+            <select name="" id="devise-arrive">
+                <option value="EUR">Euro (EUR)</option>
+                <option value="USD">American Dollar (USD)</option>
+                <option value="MAD">Moroccan dirham (MAD)</option>
+                <option value="JPY">Japenis Yen (JPY)</option>
+                <option value="GBP">Pound Sterling (GBP)</option>
+            </select>
+        </div>
+        <div class="child-btn">
+            <button id="btn-convertir">Convertir</button>
+        </div>
+        
+    </div>
+    <div class="dv-affichage">
+        <h3 id="resultat">Le resultat s'affichera ici</h3>
+    </div>
+
+
+
+
+
+
+
+    <script>
+        const champMontant = document.getElementById('montant');
+        const champDeviseDepart = document.getElementById('devise-envoye');
+        const champDeviseArrive = document.getElementById('devise-arrive');
+        const btnConvertir = document.getElementById('btn-convertir');
+        const resultat = document.getElementById('resultat');
+
+        btnConvertir.addEventListener('click', function(){
+            let montant = champMontant.value;
+            let deviseDepart = champDeviseDepart.value;
+            let deviseArrive = champDeviseArrive.value;
+
+            if(montant == ''){
+                montant = 1;
+            }
+            if(deviseDepart === deviseArrive){
+                resultat.innerText = montant + ' ' + deviseDepart + ' = ' + montant + ' ' + deviseArrive;
+                return;
+            }
+
+            const url = `https://api.frankfurter.app/latest?amount=${montant}&from=${deviseDepart}&to=${deviseArrive}`
+
+            fetch(url)
+            .then(reponse => reponse.json())
+            .then(data => {
+                let resultatConverti = data.rates[deviseArrive];
+                resultat.innerText = montant + ' ' + deviseDepart + ' = ' + resultatConverti + ' ' + deviseArrive;
+            })
+            .catch(erreur => {
+                console.error('Erreur :', erreur);
+                resultat.innerText = 'Oups impossible de convertir !!! (Erreur réseau)';
+            });
+        })
+
+    </script>
+</body>
+</html>

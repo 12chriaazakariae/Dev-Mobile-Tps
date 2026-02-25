@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP To-Do List</title>
+    <style>
+        #message-con{
+            color:rgb(0, 136, 255);
+            text-align: center;
+        }
+        p{
+            text-align: center;
+            color: green;
+            font-weight: bold;
+        }
+        ul{
+            text-decoration: none;
+            list-style-type: none;
+
+        }
+        ul li{
+            padding:10px;
+            cursor: pointer;
+        }
+        .parent{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .child{
+            background-color: rgb(0, 136, 255);
+            width:600px;
+            color: white;
+            /* transition: all .3s; */
+            margin: 10px 5px;
+            border-radius: 15px;
+            padding: 0px 15px;
+
+            display: flex;
+            justify-content: space-between;
+        }
+        /* .child:hover{
+            background-color: rgba(0, 136, 255, 0.8);
+            box-shadow: 0 0 10px rgb(0, 0, 0, .8);
+        } */
+        .btn-terminer{
+            background-color: white;
+            border: none;
+            padding: 4px 15px;
+            color: rgb(31, 255, 64);
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-terminer:hover{
+            background-color: rgba(31, 255, 64, .8);
+            box-shadow: 0 0 10px rgb(255, 255, 255, .8);
+            color: white;
+        }
+        #input-tache{
+            width: 450px;
+            margin-left: 45px;
+            padding: 10px 15px;
+            border-radius: 15px;
+        }
+        #btn-ajouter{
+            background-color: rgb(0, 153, 255);
+            border: none;padding: 4px 15px;
+            color:white;
+            cursor: pointer;
+            border-radius: 15px;
+            font-weight: bold;
+            padding: 10px 25px;
+        }
+        #btn-ajouter:hover{
+            background-color: rgba(0, 153, 255,.8);
+            box-shadow: 0 0  10px rgb(0, 0, 0, .2);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="message-con"></h1>
+    <p id="message-confirmation"></p>
+    <div class='div-search' style="text-align: center; margin-bottom: 20px;">
+    <input type="text" id="input-tache" placeholder="Écrire une nouvelle tâche...">
+    <button id="btn-ajouter">Ajouter</button>
+    </div>
+    <div class="parent">
+        <ul id="liste-taches">
+            <div class="child">
+                <li id="ajouter">On y va</li>
+            </div>
+        </ul>
+    </div>
+    <script>
+        fetch('https://jsonplaceholder.typicode.com/todos')
+        .then(reponse => reponse.json())
+        .then(taches=>{
+            let list = document.getElementById('liste-taches');
+            list.innerHTML = '';
+            let heading = document.getElementById('message-con');
+            heading.innerText = 'To-do List'
+            // ================Lire le contenu ==============
+            let AddInput = document.getElementById('input-tache');
+            let btnAjouter = document.getElementById("btn-ajouter");
+
+            btnAjouter.addEventListener('click', function(){
+                let ToAdd = AddInput.value;
+
+                if(ToAdd == ''){
+                    alert('La tache est vide!!!');
+                }else{
+                    fetch('https://jsonplaceholder.typicode.com/todos' , {
+                        method : 'POST',
+                        headers: {
+                            'Content-Type' : 'application/json',
+                        },
+                        body : JSON.stringify({
+                            title:ToAdd ,
+                            completed:false,
+                            userId :1,
+                        })
+                    })
+                    .then(reponse => reponse.json())
+                    .then(nouvelleTache => {
+                        document.getElementById('message-confirmation').innerText = 'la tache <'+nouvelleTache.title + '> est bien ajouter!!';
+                        AddInput.value = '';
+                    })
+                    .catch(erreur => console.error('Erreur de l\'envoie : ', erreur));
+                }
+            })
+
+            let taches10 = taches.slice(0,10);
+            
+            taches10.forEach(tache =>{
+                let newList = document.createElement('li');
+                newList.innerText = tache.title;
+                
+                let newDiv = document.createElement('div');
+                newDiv.className = 'child';
+                newDiv.appendChild(newList);
+                
+                let buttonTermnier = document.createElement('button');
+                buttonTermnier.innerText = 'Terminer ✅';
+                buttonTermnier.style.margin = '10px';
+                buttonTermnier.className = 'btn-terminer'
+                // buttonTermnier.style.display = 'lock';
+                // ===================================================================================
+                buttonTermnier.addEventListener('click', function(){
+                    fetch('https://jsonplaceholder.typicode.com/todos/'+tache.id , {
+                        method : 'PUT',
+                        headers : {
+                            'Content-Type' : 'application/json',
+                        },
+                        body : JSON.stringify({
+                            completed : true
+                        })
+                    })
+                    .then(reponse =>reponse.json())
+                    .then(dataModifier => {
+                        document.getElementById('message-confirmation').innerText = 'la tache <'+ tache.title + '> est completé ⬆️⬆️';
+
+                        newList.style.textDecoration = 'line-through';
+                        buttonTermnier.style.display = 'none';
+                    })
+                    .catch(erreur=> console.error('Erreur de modification: '+erreur));
+                    
+                })
+                // ===================================================================================
+                let div_btn = document.createElement('div');
+                div_btn.className = 'div_btn';
+
+                div_btn.appendChild(buttonTermnier);
+                newDiv.appendChild(div_btn);
+                
+                list.appendChild(newDiv);
+
+            });
+        })
+        .catch(erreur => console.error('Erreur reseau '+ erreur))
+    </script>
+</body>
+</html>
